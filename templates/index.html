@@ -1,0 +1,11 @@
+{% extends "layout.html" %}
+
+{% block title %} Home Page {% endblock %}
+
+{% block body %}
+
+	{% if g.user %}
+			<h1>You are logged in as {{ g.user }}!</h1>
+	{% endif %}
+
+{% endblock %}

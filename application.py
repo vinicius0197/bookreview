@@ -1,6 +1,6 @@
 import os
 
-from flask import Flask, session, render_template, request
+from flask import Flask, session, render_template, request, g
 from flask_session import Session
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
@@ -25,10 +25,13 @@ Session(app)
 engine = create_engine(os.getenv("DATABASE_URL"))
 db = scoped_session(sessionmaker(bind=engine))
 
+@app.before_request
+def before_request():
+    g.user = session["user"]
 
 @app.route("/")
 def index():
-    return render_template("layout.html")
+    return render_template("index.html")
 
 @app.route("/registration")
 def registration():
@@ -58,3 +61,37 @@ def registrate_user():
 	db.commit()
 
 	return render_template('registration.html')
+
+@app.route("/login")
+def login():
+	"""
+
+	Renders login form
+
+	"""
+
+	return render_template('login.html')
+
+@app.route("/login_user", methods=['POST'])
+def login_user():
+	"""
+
+	Authenticate user
+
+	"""
+
+	# Get form information
+	username = str(request.form.get("username"))
+	pwd = str(request.form.get("password"))
+
+	# Queries database to check if username and password exists	
+	user_data = db.execute("SELECT password FROM users WHERE username = :username", {"username": username}).fetchone()
+
+	if user_data is None:
+		return "This user does not exist"
+
+	if pbkdf2_sha256.verify(pwd, user_data.password):
+		session["user"] = username
+		session["logged_in"] = True
+		# return "You are logged in"
+		return render_template("index.html")
