@@ -10,6 +10,13 @@
 <body>
 	<nav class="navbar navbar-toggleable-md navbar-inverse fixed-top bg-inverse">
 		<a class="navbar-brand" href="{{ url_for('index') }}">Book Review</a>
+		<ul class="nav navbar-nav navbar-right">
+			{% if session["logged_in"] == True %}
+				<li><a href="/logout">Logout</a></li>
+			{% else %}
+				<li><a href="/login">Login</a></li>
+			{% endif %}
+		</ul>
 	</nav>
 	{% block body %}
 	{% endblock %}

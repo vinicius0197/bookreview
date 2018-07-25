@@ -1,6 +1,6 @@
 import os
 
-from flask import Flask, session, render_template, request, g
+from flask import Flask, session, render_template, request, g, redirect, url_for
 from flask_session import Session
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
@@ -27,7 +27,9 @@ db = scoped_session(sessionmaker(bind=engine))
 
 @app.before_request
 def before_request():
-    g.user = session["user"]
+    if 'logged_in' in session:
+    	g.user = session["user"]
+
 
 @app.route("/")
 def index():
@@ -54,13 +56,19 @@ def registrate_user():
 	username = request.form.get("username")
 	pwd = request.form.get("password")
 
-	# Encrypt password using python passlib library
-	hash = pbkdf2_sha256.encrypt(pwd, rounds=200000, salt_size=16)
 
-	db.execute("INSERT INTO users (username, password) VALUES (:username, :pwd)", {"username": username, "pwd": hash})
-	db.commit()
+	check_username = db.execute("SELECT * FROM users WHERE username = :username", {"username": username}).fetchone()
 
-	return render_template('registration.html')
+	if check_username is None:
+		# Encrypt password using python passlib library
+		hash = pbkdf2_sha256.encrypt(pwd, rounds=200000, salt_size=16)
+
+		db.execute("INSERT INTO users (username, password) VALUES (:username, :pwd)", {"username": username, "pwd": hash})
+		db.commit()
+
+		return render_template('registration.html')
+	else:
+		return 'Username already taken'
 
 @app.route("/login")
 def login():
@@ -93,5 +101,19 @@ def login_user():
 	if pbkdf2_sha256.verify(pwd, user_data.password):
 		session["user"] = username
 		session["logged_in"] = True
-		# return "You are logged in"
 		return render_template("index.html")
+
+@app.route("/logout")
+def logout():
+	"""
+
+	Logout user
+
+	"""
+
+	# Remove username from session if it is here
+	session.pop('user', None)
+	session.pop('logged_in', None)
+
+	return redirect(url_for('index'))
+

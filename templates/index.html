@@ -6,6 +6,10 @@
 
 	{% if g.user %}
 			<h1>You are logged in as {{ g.user }}!</h1>
+	
+	{% else %}
+			<a href="{{ url_for('login') }}"> Click to Login</a><br>
+			<a href="{{ url_for('registration') }}">Registrate</a>
 	{% endif %}
 
 {% endblock %}
