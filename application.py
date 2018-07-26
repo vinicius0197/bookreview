@@ -101,7 +101,7 @@ def login_user():
 	if pbkdf2_sha256.verify(pwd, user_data.password):
 		session["user"] = username
 		session["logged_in"] = True
-		return render_template("index.html")
+		return render_template("search.html")
 
 @app.route("/logout")
 def logout():
@@ -117,3 +117,26 @@ def logout():
 
 	return redirect(url_for('index'))
 
+@app.route("/search", methods=['GET', 'POST'])
+def search():
+	"""
+	
+	Implements search functionality in the web app
+
+	"""
+	if request.method == 'POST':
+		search_input = '%' + str(request.form.get("search")) + '%'
+
+		# Queries database for similar results (case insensitive)
+		result = db.execute("SELECT * FROM books WHERE isbn LIKE :search \
+			OR LOWER(author) LIKE :search \
+			OR LOWER(title) LIKE :search \
+			OR year LIKE :search", \
+			{"search": search_input}).fetchall()
+
+		for row in result:
+			print(row)
+
+		return render_template("search.html", result=result)
+	else:
+		return render_template("search.html")
