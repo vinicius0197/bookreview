@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+
+{% block title %} Book Info {% endblock %}
+
+{% block body %}
+
+<div class="container">
+	<h2> {{ book_info[3] }} </h2>	
+</div>
+
+<div class="container">
+	<table class="table table-striped">
+		<thead>
+			<tr>
+				<th scope="col">ISBN</th>
+				<th scope="col">Author</th>
+				<th scope="col">Title</th>
+				<th scope="col">Year</th>
+			</tr>
+		</thead>
+		
+		<tbody>
+			<tr>
+				<th scope="row"> {{ book_info[1] }} </th>
+				<td> {{book_info[2]}} </td>
+				<td> {{book_info[3]}} </td>
+				<td> {{book_info[4]}} </td>
+			</tr>
+		</tbody>
+	</table>
+</div>
+
+{% endblock %}

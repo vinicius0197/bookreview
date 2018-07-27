@@ -28,11 +28,23 @@
 	</div>
 
 	<div class="container">
-		<ul>
-			{% for item in result -%}
-				<li> {{ item }} </li>				
-			{%- endfor %}
-		</ul>
+		<table class="table table-striped">
+			<thead>
+				<tr>
+					<th scope="col"> Author </th>
+					<th scope="col"> Title </th>
+				</tr>
+			</thead>
+			
+			<tbody>
+				{% for item in range(result|length) -%}
+					<tr>
+						<th scope="row"><a href="{{  url_for('search_id', id=result[item][0]) }}"> {{ result[item][2] }}</a></th>
+						<td><a href="{{url_for('search_id', id=result[item][0])}}">{{ result[item][3] }}</a></td>
+					</tr>
+				{%- endfor %}
+			</tbody>
+		</table>
 	</div>
 
 	<div class="container">

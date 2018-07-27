@@ -127,7 +127,7 @@ def logout():
 
 	return redirect(url_for('index'))
 
-@app.route("/search", methods=['GET', 'POST'])
+@app.route("/search/", methods=['GET', 'POST'])
 @login_required
 def search():
 	"""
@@ -160,3 +160,12 @@ def search():
 		return render_template("search.html", result=result)
 	else:
 		return render_template("search.html")
+
+@app.route("/search/<id>")
+def search_id(id):
+	book_id = int(id)
+
+	book_info = db.execute("SELECT * FROM books WHERE id = :id", \
+		{"id": book_id}).fetchone()
+
+	return render_template("book.html", book_info=book_info)
