@@ -32,6 +32,11 @@
 		</tbody>
 	</table>
 
+<div class="container">
+	<h2>
+		{{ message }}
+	</h2>
+</div>
 
 <form action="{{ url_for('review', id=book_info[0]) }}" method="post">
 	<select name="review">
@@ -43,10 +48,30 @@
 	</select><br>
 
 	<textarea name="text" rows="4" cols="50">
-		Enter your review
 	</textarea><br>
 
-	<button type="submit" class="btn btn-primary">Send Review</button>
+	<br><button type="submit" class="btn btn-primary">Send Review</button>
 </form>
+
+<div class="container">
+	<table class="table table-striped">
+		<thead>
+			<tr>
+				<th scope="col">Rating</th>
+				<th scope="col">Comment</th>
+			</tr>
+		</thead>
+		
+		<tbody>
+			<tr>
+				{% for review in review_list -%}
+					<td>{{ review[1] }}</td>
+					<td> {{ review[3] }} </td>
+				{%- endfor %}
+			</tr>
+		</tbody>
+	</table>
+	
+</div>
 
 {% endblock %}

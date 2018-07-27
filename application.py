@@ -164,21 +164,50 @@ def search():
 @app.route("/search/<id>")
 @login_required
 def search_id(id):
+	"""
+
+	Shows book page with relevant information
+
+	"""
 	book_id = int(id)
 
 	book_info = db.execute("SELECT * FROM books WHERE id = :id", \
 		{"id": book_id}).fetchone()
 
-	return render_template("book.html", book_info=book_info)
+	review_list = db.execute("SELECT * FROM reviews WHERE review_id = :review_id", \
+		{"review_id": book_id}).fetchall()
+
+	return render_template("book.html", book_info=book_info, review_list=review_list)
 
 @app.route("/review/<id>", methods=['POST'])
 def review(id):
-	rating = request.form.get("review")
-	book_id = int(id)
-	text = request.form.get("text")
+	"""
 
-	db.execute("INSERT INTO reviews (rating, review_id, text) VALUES (:rating, :book_id, :text)", \
-		{"rating": rating, "book_id": book_id, "text":text})
-	db.commit()
-	
+	Handles user review submission and display
+
+	"""
+
+	user_id = db.execute("SELECT id FROM users WHERE username = :username", \
+						{"username": session["user"]}).fetchone()
+
+	user_id = int(user_id[0])
+	book_id = int(id)
+
+	book_info = db.execute("SELECT * FROM books WHERE id = :id", \
+		{"id": book_id}).fetchone()
+
+	if not db.execute("SELECT * FROM reviews WHERE user_id = :user_id AND review_id = :review_id", \
+						{"user_id": user_id, "review_id": book_id}).fetchone():
+		rating = request.form.get("review")
+		text = request.form.get("text")
+
+		db.execute("INSERT INTO reviews (rating, review_id, text, user_id) VALUES (:rating, :book_id, :text, :user_id)", \
+			{"rating": rating, "book_id": book_id, "text":text, "user_id":user_id})
+		db.commit()
+
+	review_list = db.execute("SELECT * FROM reviews WHERE review_id = :review_id", \
+		{"review_id": book_id}).fetchall()
+
+	return render_template("book.html", book_info=book_info, review_list=review_list)
+		
 	return redirect(url_for('search', id=book_id))
