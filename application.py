@@ -229,3 +229,23 @@ def review(id):
 		
 	return redirect(url_for('search', id=book_id))
 
+@app.route("/api/<isbn>", methods=['GET'])
+def api(isbn):
+	"""
+	
+	Implements API for web app, returning json with book info
+
+	"""
+
+	response = {}
+
+	data = db.execute("SELECT * FROM books WHERE isbn = :isbn", \
+						{"isbn": isbn}).fetchone()
+
+	response["isbn"] = data[1]
+	response["author"] = data[2]
+	response["title"] = data[3]
+	response["year"] = data[4]
+
+
+	return json.dumps(response, ensure_ascii=False)
