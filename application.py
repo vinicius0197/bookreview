@@ -1,5 +1,6 @@
 import os
 
+from functools import wraps
 from flask import Flask, session, render_template, request, g, redirect, url_for
 from flask_session import Session
 from sqlalchemy import create_engine
@@ -29,7 +30,16 @@ db = scoped_session(sessionmaker(bind=engine))
 def before_request():
     if 'logged_in' in session:
     	g.user = session["user"]
+    else:
+    	g.user = None
 
+def login_required(f):
+	@wraps(f)
+	def decorated_function(*args, **kwargs):
+		if g.user is None:
+			return redirect(url_for('login', next=request.url))
+		return f(*args, **kwargs)
+	return decorated_function
 
 @app.route("/")
 def index():
@@ -118,6 +128,7 @@ def logout():
 	return redirect(url_for('index'))
 
 @app.route("/search", methods=['GET', 'POST'])
+@login_required
 def search():
 	"""
 	
