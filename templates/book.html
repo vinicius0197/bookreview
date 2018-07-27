@@ -3,6 +3,9 @@
 {% block title %} Book Info {% endblock %}
 
 {% block body %}
+<link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+
+<link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
 
 <div class="container">
 	<h2> {{ book_info[3] }} </h2>	
@@ -28,6 +31,22 @@
 			</tr>
 		</tbody>
 	</table>
-</div>
+
+
+<form action="{{ url_for('review', id=book_info[0]) }}" method="post">
+	<select name="review">
+		<option value="1">1</option>
+		<option value="2">2</option>
+		<option value="3">3</option>
+		<option value="4">4</option>
+		<option value="5">5</option>
+	</select><br>
+
+	<textarea name="text" rows="4" cols="50">
+		Enter your review
+	</textarea><br>
+
+	<button type="submit" class="btn btn-primary">Send Review</button>
+</form>
 
 {% endblock %}

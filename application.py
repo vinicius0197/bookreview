@@ -162,6 +162,7 @@ def search():
 		return render_template("search.html")
 
 @app.route("/search/<id>")
+@login_required
 def search_id(id):
 	book_id = int(id)
 
@@ -169,3 +170,15 @@ def search_id(id):
 		{"id": book_id}).fetchone()
 
 	return render_template("book.html", book_info=book_info)
+
+@app.route("/review/<id>", methods=['POST'])
+def review(id):
+	rating = request.form.get("review")
+	book_id = int(id)
+	text = request.form.get("text")
+
+	db.execute("INSERT INTO reviews (rating, review_id, text) VALUES (:rating, :book_id, :text)", \
+		{"rating": rating, "book_id": book_id, "text":text})
+	db.commit()
+	
+	return redirect(url_for('search', id=book_id))
