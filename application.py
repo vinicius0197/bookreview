@@ -125,7 +125,16 @@ def search():
 
 	"""
 	if request.method == 'POST':
-		search_input = '%' + str(request.form.get("search")) + '%'
+		search = str(request.form.get("search"))
+		
+		if search is '':
+			print(search)
+			return render_template("search.html")
+
+		search_input = '%' + str.lower(search) + '%'
+		
+		# Message to show if there are no results
+		message = 'No results found'
 
 		# Queries database for similar results (case insensitive)
 		result = db.execute("SELECT * FROM books WHERE isbn LIKE :search \
@@ -134,8 +143,8 @@ def search():
 			OR year LIKE :search", \
 			{"search": search_input}).fetchall()
 
-		for row in result:
-			print(row)
+		if not result:
+			return render_template("search.html", message=message)
 
 		return render_template("search.html", result=result)
 	else:
