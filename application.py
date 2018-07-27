@@ -1,5 +1,6 @@
 import os
-
+import requests
+import json
 from functools import wraps
 from flask import Flask, session, render_template, request, g, redirect, url_for
 from flask_session import Session
@@ -40,6 +41,17 @@ def login_required(f):
 			return redirect(url_for('login', next=request.url))
 		return f(*args, **kwargs)
 	return decorated_function
+
+def getGoodreads(id, book_info):
+	response = {}
+
+	request_url = "https://www.goodreads.com/book/review_counts.json"
+	res = requests.get(request_url, params={"key": os.getenv("GOODREADS_KEY"), "isbns": book_info[1]})
+	json_data = res.json()
+	response['score'] = json_data['books'][0]['average_rating']
+	response['review_qty'] = json_data['books'][0]['work_reviews_count']
+
+	return response
 
 @app.route("/")
 def index():
@@ -174,19 +186,22 @@ def search_id(id):
 	book_info = db.execute("SELECT * FROM books WHERE id = :id", \
 		{"id": book_id}).fetchone()
 
+	goodreads_data = getGoodreads(id, book_info)
+
 	review_list = db.execute("SELECT * FROM reviews WHERE review_id = :review_id", \
 		{"review_id": book_id}).fetchall()
 
-	return render_template("book.html", book_info=book_info, review_list=review_list)
+	return render_template("book.html", book_info=book_info, review_list=review_list, goodreads = goodreads_data)
 
 @app.route("/review/<id>", methods=['POST'])
 def review(id):
 	"""
 
-	Handles user review submission and display
+	Handles user review submission and display, and also manages
+	Goodreads API for fetching average rating and number of reviews
+	for books.
 
 	"""
-
 	user_id = db.execute("SELECT id FROM users WHERE username = :username", \
 						{"username": session["user"]}).fetchone()
 
@@ -195,6 +210,8 @@ def review(id):
 
 	book_info = db.execute("SELECT * FROM books WHERE id = :id", \
 		{"id": book_id}).fetchone()
+
+	goodreads_data = getGoodreads(id, book_info)
 
 	if not db.execute("SELECT * FROM reviews WHERE user_id = :user_id AND review_id = :review_id", \
 						{"user_id": user_id, "review_id": book_id}).fetchone():
@@ -208,6 +225,7 @@ def review(id):
 	review_list = db.execute("SELECT * FROM reviews WHERE review_id = :review_id", \
 		{"review_id": book_id}).fetchall()
 
-	return render_template("book.html", book_info=book_info, review_list=review_list)
+	return render_template("book.html", book_info=book_info, review_list=review_list, goodreads = goodreads_data)
 		
 	return redirect(url_for('search', id=book_id))
+
