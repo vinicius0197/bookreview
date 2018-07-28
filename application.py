@@ -2,7 +2,7 @@ import os
 import requests
 import json
 from functools import wraps
-from flask import Flask, session, render_template, request, g, redirect, url_for
+from flask import Flask, session, render_template, request, g, redirect, url_for, abort
 from flask_session import Session
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
@@ -241,6 +241,9 @@ def api(isbn):
 
 	data = db.execute("SELECT * FROM books WHERE isbn = :isbn", \
 						{"isbn": isbn}).fetchone()
+
+	if not data:
+		abort(404)
 
 	response["isbn"] = data[1]
 	response["author"] = data[2]
